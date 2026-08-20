@@ -149,6 +149,8 @@
 | 2026-08-20 | 第一版功能验收 | ✅ 已通过 | 用户确认"功能都不错"（用户拍板） |
 | 2026-08-20 | 安装包格式 | ✅ 已确认 | 仅 exe（NSIS）安装程序（用户拍板） |
 | 2026-08-20 | 应用图标 | ✅ 已确认 | 绿底"记"字，由 scripts/gen-icon.mjs 生成（用户拍板） |
+| 2026-08-20 | 代码版本管理 | ✅ 已确认 | 启用 Git，**仅本机存档**，不上传云端、不注册账号（用户拍板） |
+| 2026-08-20 | Git 存档署名 | ✅ 已确认 | 名字 `27272` / 邮箱 `27272@local`（占位假邮箱，仅本项目生效，用户拍板） |
 | — | 其余进阶功能（导出 / 预算 / 收入） | ⏳ 待以后再定 | — |
 
 ## 七、项目里程碑
@@ -183,3 +185,14 @@
   - 已手动放置好的 NSIS 工具缓存：`C:\Users\27272\AppData\Local\tauri\NSIS\`（含 tauri 专用插件 `Plugins\x86-unicode\additional\nsis_tauri_utils.dll`，SHA1 校验与官方一致）。
   - 若该目录被删除（打包器发现缺文件时会整个删掉重建），恢复方法：从 `https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.11/nsis-3.11.zip` 下载 zip（curl 长超时可用），解压出 `nsis-3.11` 文件夹改名为 `NSIS` 放入 `C:\Users\27272\AppData\Local\tauri\`，再从 `https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll` 下载 DLL 放到上述 additional 目录。
 - **重新生成图标**：改图标时运行 `node scripts/gen-icon.mjs` 生成 app-icon.png，再 `npx tauri icon app-icon.png`，最后重新打包。
+
+## 九、Git 版本管理约定（2026-08-20 启用）
+
+- **范围**：仅本机存档（`git init -b main`），**不推送任何远程仓库**。用户未授权上传云端；若将来要加，须重新走"列方案 → 用户拍板"流程。
+- **配置**：署名与 `core.autocrlf=false` 均为**仓库级**（`git config` 不带 `--global`），不影响用户电脑上的其他项目。`autocrlf=false` 是为了让 Git 原样保存文件，不偷偷改换行符。
+- **排除清单**：`.gitignore` 已排除 `node_modules`、`dist`、`.claude/settings.local.json`；`src-tauri/.gitignore` 已排除 `target/` 与 `gen/schemas`。新增大体积自动生成产物时记得补进排除清单。
+- **提交习惯**：每完成一个里程碑或用户验收通过后提交一次，提交说明用中文，写清"做了什么"。
+- **给用户的常用操作**（用户不懂命令行，由 Claude 代为执行）：
+  - 看历史存档：`git log --oneline`
+  - 看当前改动：`git status -sb` / `git diff`
+  - 退回到某个存档点：`git checkout <存档编号>`（危险操作，执行前必须先向用户解释并确认）
