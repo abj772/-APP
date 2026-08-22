@@ -176,6 +176,7 @@
 - **重要坑位**：
   - 当前会话中 cargo 不在 PATH，运行 Rust 相关命令前先执行：`export PATH="$PATH:$HOME/.cargo/bin"`
   - ⚠️ `create-tauri-app --force` 会**清空目标目录**（曾误删本文档，已恢复）。绝不要再对含文件的项目目录使用 --force 重建。
+  - **上传 GitHub 需借道代理**：国内直连 GitHub 会报 `Connection was reset`。本机代理软件端口 `127.0.0.1:7897`（浏览器走系统代理可正常访问 GitHub）。本仓库已配置 `git config http.proxy http://127.0.0.1:7897`（仓库级，不影响其他项目）。以后推送失败先确认代理软件在运行。
 - **内部命名**：代码内部英文代号 `jijizhang`（编程规范不允许中文名）；界面显示名"记记账"（productName 与窗口标题均已设置）。
 - **常用命令**：
   - 启动开发版（带界面实时预览）：`npm run tauri dev`
