@@ -1,7 +1,96 @@
-# Tauri + Vue + TypeScript
+# 记记账 📒
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> Windows 上的本地记账小工具：随手记下每一笔花销，清楚知道钱花在了哪。
 
-## Recommended IDE Setup
+**记一笔账，30 秒内搞定。**
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## ✨ 核心特点
+
+- 🔒 **数据 100% 留在本机**：不联网、不上传、无需注册账号，账单只有你自己看得到
+- 🪶 **轻量快速**：基于 Tauri 打造，安装包只有几 MB，内存占用低，启动秒开
+- 🎨 **简洁美观**：清新绿主题，竖版窄窗设计，界面一目了然
+
+## 📋 功能特性
+
+- 📝 **记一笔**：金额、两级分类（大类 → 小类）、日期（默认今天）、备注（可选）
+- 📖 **账单列表**：按日期分组展示（今天 / 昨天 / 日期 + 当日小计），时间倒序
+- 🔍 **搜索与筛选**：按日期范围、分类筛选，按备注关键词搜索
+- 📊 **统计图表**：月度总支出、笔数、日均三个卡片 + 分类占比饼图 + 每日支出柱状图
+- 🗂️ **分类管理**：内置 10 个大类、40+ 个小类（餐饮、交通、购物……），支持自定义增删改
+- ✏️ **编辑与删除**：任何一笔账可改可删，删除有二次确认，不怕误触
+
+## 💻 安装使用
+
+- **运行平台**：Windows 11（Windows 10 亦可）
+- **安装方式**：运行安装包 `记记账_0.1.0_x64-setup.exe`，按提示安装即可
+- **安装包位置**：由本项目打包生成，位于 `src-tauri\target\release\bundle\nsis\` 目录（打包产物不包含在本仓库中）
+
+## 💾 数据存储与备份
+
+账单数据保存在一个 SQLite 数据库文件里（SQLite 是"一个小文件 = 一个迷你数据库"的存储方式，稳定可靠）：
+
+```
+C:\Users\<你的用户名>\AppData\Roaming\com.jijizhang.app\jijizhang.db
+```
+
+- 卸载或重装 App **不会**删除账单数据
+- **备份方法**：直接把这个 `jijizhang.db` 文件复制一份存到别处即可，恢复时放回原位置
+- 数据不在项目文件夹内，代码存档、上传等操作都不会触及你的账单
+
+## 🛠️ 技术栈
+
+| 部分 | 技术 |
+| --- | --- |
+| 桌面外壳 | Tauri 2（Rust） |
+| 界面 | Vue 3 + TypeScript + Vite |
+| UI 组件库 | Element Plus |
+| 图表 | ECharts |
+| 数据存储 | SQLite |
+
+> 选择 Tauri 的原因：安装包小（约 3~10 MB）、内存占用低、界面现代。详见项目文档 CLAUDE.md 第五章。
+
+## 👨‍💻 开发指南
+
+### 环境要求
+
+| 工具 | 说明 |
+| --- | --- |
+| Node.js | ≥ 20（本机开发环境为 v24） |
+| Rust 工具链 | 1.97+（`rustup` 安装） |
+| MSVC 编译工具 | Windows 的 C++ 编译工具（Tauri 打包必需） |
+| WebView2 | Windows 11 自带，无需另装 |
+
+### 常用命令
+
+| 命令 | 用途 |
+| --- | --- |
+| `npm install` | 安装界面依赖 |
+| `npm run tauri dev` | 启动开发版（带界面实时预览） |
+| `npm run tauri build` | 打包成 Windows 安装包（NSIS 格式） |
+
+### 项目结构
+
+```
+记账APP/
+├── src/                 界面代码（Vue 3 + TypeScript）
+│   ├── pages/           三个页面：账单 / 统计 / 设置
+│   ├── components/      界面组件
+│   └── api.ts           与桌面外壳通信的接口
+├── src-tauri/           桌面外壳（Rust）
+│   └── src/lib.rs       核心逻辑（数据库读写、界面调用接口）
+├── scripts/             辅助脚本（应用图标生成等）
+├── CLAUDE.md            产品文档与项目约定（项目"总纲"）
+└── README.md            本文件
+```
+
+## 📜 版本历史
+
+| 版本 | 日期 | 内容 |
+| --- | --- | --- |
+| v0.1.0 | 2026-08-20 | 首个可用版本：记一笔、账单列表、分类管理、搜索筛选、统计图表 |
+
+## 📄 其他说明
+
+- 本项目为个人记账工具，未设置开源许可证
+- 详细产品文档、技术决策记录与协作约定见 [CLAUDE.md](CLAUDE.md)
+- 界面显示名"记记账"；代码内部英文代号 `jijizhang`
