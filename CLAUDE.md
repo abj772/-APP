@@ -152,6 +152,10 @@
 | 2026-08-20 | 代码版本管理 | ✅ 已确认 | 启用 Git，**仅本机存档**，不上传云端、不注册账号（用户拍板） |
 | 2026-08-22 | 代码云端备份 | ✅ 已确认 | 上传**一次存档**到 GitHub 私人仓库（仅自己可见）：账号 abj772，仓库 https://github.com/abj772/-APP；此后继续本机存档、不自动同步（用户拍板） |
 | 2026-08-20 | Git 存档署名 | ✅ 已确认 | 名字 `27272` / 邮箱 `27272@local`（占位假邮箱，仅本项目生效，用户拍板） |
+| 2026-09-03 | 单元测试 | ✅ 已确认 | 前端 Vitest + 后端 Rust 内置测试，前后端都测（用户拍板） |
+| 2026-09-03 | 开发工具安装位置（本机重装） | ✅ 已确认 | Rust 全装 `D:\Rust`；微软编译工具装 `D:\BuildTools`；Windows SDK 微软强制留 C 盘（用户要求尽量不占 C 盘，拍板） |
+| 2026-09-03 | 全局技能与子代理 | ✅ 已确认 | 全局技能 git-save（git 存档）与 unit-test（单元测试）写入 `C:\Users\lenovo\.claude\skills\`；全局子代理 tester（`C:\Users\lenovo\.claude\agents\tester.md`）负责执行单元测试；所有项目可用（用户拍板） |
+| 2026-09-03 | 全局协作约定 | ✅ 已确认 | 5 条协作约定写入全局 `C:\Users\lenovo\.claude\CLAUDE.md`，对所有项目生效（用户拍板） |
 | — | 其余进阶功能（导出 / 预算 / 收入） | ⏳ 待以后再定 | — |
 
 ## 七、项目里程碑
@@ -164,28 +168,30 @@
 | ④ | 进阶功能（导出 / 预算 / 收入，以后再定） | ⏳ 未开始 |
 | ⑤ | 打包成 Windows 安装包 | ✅ 完成（2026-08-20，产物：src-tauri\target\release\bundle\nsis\记记账_0.1.0_x64-setup.exe） |
 | ⑥ | 用户验收与反馈 | ⏳ 未开始 |
+| ⑦ | 单元测试：前端 Vitest 10 题 + 后端 Rust 内置 2 组题 | ✅ 完成（2026-09-03 全部通过） |
 
 ## 八、开发环境备忘
 
 - **项目结构**：界面代码在 `src/`（Vue 3 + TypeScript）；桌面外壳代码在 `src-tauri/`（Rust）；界面与窗口配置在 `src-tauri/tauri.conf.json`。
 - **已装工具**：
   - Node.js v24（C 盘，系统自带）
-  - Rust 1.97.1（C 盘用户目录：`C:\Users\27272\.cargo` 与 `.rustup`，按用户决定留在 C 盘）
-  - 微软编译工具 MSVC（**D:\BuildTools**，按用户决定装 D 盘）
+  - Rust 1.98.0（**D:\Rust** 下 `.rustup` 与 `.cargo`，按用户要求尽量不占 C 盘；用户级环境变量 RUSTUP_HOME / CARGO_HOME / PATH 已写入，2026-09-03）
+  - 微软编译工具 MSVC 14.44（**D:\BuildTools**）；Windows SDK 按微软规定只能留在 C 盘 `C:\Program Files (x86)\Windows Kits\10`
   - WebView2 网页引擎（Windows 11 自带，无需另装）
 - **重要坑位**：
-  - 当前会话中 cargo 不在 PATH，运行 Rust 相关命令前先执行：`export PATH="$PATH:$HOME/.cargo/bin"`
+  - cargo 已在系统用户级 PATH 里（`D:\Rust\.cargo\bin`）。但**安装前就打开的旧终端窗口**不认识新 PATH，遇到"cargo 找不到"就执行 `export PATH="$PATH:/d/Rust/.cargo/bin"` 或重开窗口。
   - ⚠️ `create-tauri-app --force` 会**清空目标目录**（曾误删本文档，已恢复）。绝不要再对含文件的项目目录使用 --force 重建。
   - **上传 GitHub 需借道代理**：国内直连 GitHub 会报 `Connection was reset`。本机代理软件端口 `127.0.0.1:7897`（浏览器走系统代理可正常访问 GitHub）。本仓库已配置 `git config http.proxy http://127.0.0.1:7897`（仓库级，不影响其他项目）。以后推送失败先确认代理软件在运行。
 - **内部命名**：代码内部英文代号 `jijizhang`（编程规范不允许中文名）；界面显示名"记记账"（productName 与窗口标题均已设置）。
 - **常用命令**：
   - 启动开发版（带界面实时预览）：`npm run tauri dev`
-  - 仅编译检查：`export PATH="$PATH:$HOME/.cargo/bin"; (cd src-tauri && cargo check)`
+  - 仅编译检查：`(cd src-tauri && cargo check)`（若报 cargo 找不到，见"重要坑位"第一条）
+  - 跑测试：前端 `npm test`；后端 `(cd src-tauri && cargo test)`
   - 打包安装包：`npm run tauri build`（产物在 `src-tauri\target\release\bundle\nsis\`）
 - **打包注意事项（重要）**：
   - ⚠️ Tauri 打包器内置下载器超时短，在国内直接下载 NSIS 工具会失败（报 `timeout: global`）。
-  - 已手动放置好的 NSIS 工具缓存：`C:\Users\27272\AppData\Local\tauri\NSIS\`（含 tauri 专用插件 `Plugins\x86-unicode\additional\nsis_tauri_utils.dll`，SHA1 校验与官方一致）。
-  - 若该目录被删除（打包器发现缺文件时会整个删掉重建），恢复方法：从 `https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.11/nsis-3.11.zip` 下载 zip（curl 长超时可用），解压出 `nsis-3.11` 文件夹改名为 `NSIS` 放入 `C:\Users\27272\AppData\Local\tauri\`，再从 `https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll` 下载 DLL 放到上述 additional 目录。
+  - NSIS 工具缓存（本机尚未放置，首次打包前需先放好）：`C:\Users\lenovo\AppData\Local\tauri\NSIS\`（含 tauri 专用插件 `Plugins\x86-unicode\additional\nsis_tauri_utils.dll`，SHA1 校验与官方一致）。
+  - 放置方法（打包器发现缺文件时会整个删掉重建）：从 `https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.11/nsis-3.11.zip` 下载 zip（curl 长超时可用），解压出 `nsis-3.11` 文件夹改名为 `NSIS` 放入 `C:\Users\lenovo\AppData\Local\tauri\`，再从 `https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll` 下载 DLL 放到上述 additional 目录。
 - **重新生成图标**：改图标时运行 `node scripts/gen-icon.mjs` 生成 app-icon.png，再 `npx tauri icon app-icon.png`，最后重新打包。
 
 ## 九、Git 版本管理约定（2026-08-20 启用）

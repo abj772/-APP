@@ -416,3 +416,77 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+// ==================== 单元测试 ====================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 测试用内存数据库，不碰真实数据文件
+    fn mem_conn() -> Connection {
+        Connection::open_in_memory().unwrap()
+    }
+
+    #[test]
+    fn date_validation_accepts_only_yyyy_mm_dd() {
+        assert!(is_valid_date("2026-08-20"));
+        assert!(is_valid_date("2026-01-01"));
+        assert!(is_valid_date("2026-12-31"));
+        assert!(!is_valid_date(""));
+        assert!(!is_valid_date("20260820"));
+        assert!(!is_valid_date("2026-8-20"));
+        assert!(!is_valid_date("2026/08/20"));
+        assert!(!is_valid_date("2026-08-20 "));
+        assert!(!is_valid_date("abcd-ef-gh"));
+        assert!(!is_valid_date("2026-08"));
+    }
+
+    #[test]
+    fn init_db_creates_tables_and_default_categories() {
+        let conn = mem_conn();
+        init_db(&conn).unwrap();
+        // 重复初始化不应重复插入
+        init_db(&conn).unwrap();
+
+        // 两张表都已创建
+        let table_count: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('categories','expenses')",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(table_count, 2);
+
+        // 默认分类：10 个大类 + 43 个小类 = 53
+        let total: i64 = conn
+            .query_row("SELECT COUNT(*) FROM categories", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(total, 53);
+
+        // 大类正好 10 个，且每个都有图标
+        let (top_count, top_no_emoji): (i64, i64) = conn
+            .query_row(
+                "SELECT COUNT(*), COALESCE(SUM(CASE WHEN emoji = '' THEN 1 ELSE 0 END), 0)
+                 FROM categories WHERE parent_id IS NULL",
+                [],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(top_count, 10);
+        assert_eq!(top_no_emoji, 0);
+
+        // 父子关系正确：餐饮饮食下面应有 7 个小类
+        let subs: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM categories c
+                 JOIN categories p ON p.id = c.parent_id
+                 WHERE p.name = '餐饮饮食'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(subs, 7);
+    }
+}
